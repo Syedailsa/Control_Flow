@@ -104,7 +104,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
             <Sparkles className="w-6 h-6 text-orange-500" />
-            <span className="text-2xl font-bold text-gradient-warm">CoachFlow AI</span>
+            <span className="text-2xl font-bold bg-gradient-to-r from-orange-700 to-amber-700 bg-clip-text text-transparent">CoachFlow AI</span>
           </Link>
         </div>
 

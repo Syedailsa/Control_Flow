@@ -86,17 +86,19 @@ export default function Home() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 backdrop-blur-sm border border-orange-200 mb-8"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/75 backdrop-blur-sm border border-orange-300 shadow-sm mb-8"
               >
-                <Sparkles className="w-4 h-4 text-orange-500" />
-                <span className="text-sm font-medium text-orange-700">
+                <Sparkles className="w-4 h-4 text-orange-700" />
+                <span className="text-sm font-semibold text-orange-900">
                   AI-Powered Lead Qualification
                 </span>
               </motion.div>
 
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-black mb-6 leading-tight">
                 Never Miss a{" "}
-                <span className="text-gradient-warm">Qualified Lead</span>
+                <span className="bg-gradient-to-r from-orange-700 to-amber-700 bg-clip-text text-transparent">
+                  Qualified Lead
+                </span>
                 {" "}Again
               </h1>
 
@@ -120,7 +122,7 @@ export default function Home() {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="px-8 py-6 text-lg border-orange-200 text-orange-700 hover:bg-orange-50"
+                    className="px-8 py-6 text-lg border-orange-300 text-orange-900 hover:bg-orange-50 font-semibold"
                   >
                     See Features
                   </Button>
