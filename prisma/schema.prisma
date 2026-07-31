@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  COACH
+  ADMIN
+}
+
+enum LeadStatus {
+  HOT
+  WARM
+  COLD
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum EmailType {
+  WELCOME
+  CONFIRMATION
+  REMINDER
+  FOLLOWUP
+  THANK_YOU
+  NURTURE
+}
+
+enum EmailStatus {
+  SENT
+  FAILED
+  PENDING
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  logo      String?
+  timezone  String   @default("UTC")
+  branding  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users User[]
+  leads Lead[]
+}
+
+model User {
+  id             String     @id @default(cuid())
+  name           String?
+  email          String     @unique
+  password       String
+  role           UserRole   @default(COACH)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  image          String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  accounts Account[]
+  sessions Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Lead {
+  id                  String            @id @default(cuid())
+  sessionId           String?           @unique
+  organizationId      String
+  organization        Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name                String?
+  email               String?
+  phone               String?
+  company             String?
+  jobTitle            String?
+  industry            String?
+  monthlyRevenue      Float?
+  businessGoals       String?
+  challenges          String?
+  budget              String?
+  timeframe           String?
+  leadSource          String?
+  score               Int               @default(0)
+  status              LeadStatus        @default(COLD)
+  qualificationData   Json?
+  conversationSummary String?
+  appointmentStatus   AppointmentStatus @default(PENDING)
+  appointmentTime     DateTime?
+  calendlyEventUri    String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  conversations Conversation[]
+  emailLogs     EmailLog[]
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  role      String
+  content   String
+  metadata  Json?
+  createdAt DateTime @default(now())
+}
+
+model KnowledgeBase {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  category  String   @default("general")
+  tags      String[]
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EmailLog {
+  id        String      @id @default(cuid())
+  leadId    String
+  lead      Lead        @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  type      EmailType
+  subject   String
+  content   String?
+  sentAt    DateTime?
+  status    EmailStatus @default(PENDING)
+  error     String?
+  createdAt DateTime    @default(now())
+}
