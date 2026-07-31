@@ -108,11 +108,14 @@ export async function POST(request: NextRequest) {
     let scoreResult = null
     let handoffNeeded = false
 
-    if (qualify) {
-      const transcript = [...historyMessages, { role: "user" as const, content: message }, { role: "assistant" as const, content: aiResponse.content }]
-        .map((m) => `${m.role.toUpperCase()}: ${m.content}`)
-        .join("\n\n")
+    const transcript = [...historyMessages, { role: "user" as const, content: message }, { role: "assistant" as const, content: aiResponse.content }]
+      .map((m) => `${m.role.toUpperCase()}: ${m.content}`)
+      .join("\n\n")
 
+    const hasEmailInTranscript = /[\w.+-]+@[\w-]+\.[\w.]+/.test(transcript)
+    const shouldQualify = qualify || (lead.email === null && hasEmailInTranscript)
+
+    if (shouldQualify) {
       const qualResponse = await chatCompletion(
         [
           { role: "system", content: QUALIFICATION_PROMPT },
@@ -139,6 +142,7 @@ export async function POST(request: NextRequest) {
           conversationSummary: rawQual.conversationSummary ?? "",
           interestLevel: rawQual.interestLevel ?? "LOW",
           bookedAppointment: !!rawQual.bookedAppointment,
+          agreedToCall: !!rawQual.agreedToCall,
           needHumanHandoff: !!rawQual.needHumanHandoff,
         }
 
@@ -178,10 +182,10 @@ export async function POST(request: NextRequest) {
           })
         }
 
-        if (
-          qualification.email &&
-          (scoreResult.status === "HOT" || scoreResult.status === "WARM")
-        ) {
+        const agreedToCall = qualification.agreedToCall
+        const strongInterest = scoreResult.status === "HOT" || scoreResult.status === "WARM"
+
+        if (qualification.email && (agreedToCall || strongInterest)) {
           const existingWelcome = await prisma.emailLog.findFirst({
             where: { leadId: lead.id, type: "WELCOME" },
           })
@@ -193,7 +197,7 @@ export async function POST(request: NextRequest) {
               leadId: lead.id,
               data: {
                 leadName: qualification.name || "",
-                calendarLink: process.env.NEXTAUTH_URL || "",
+                calendarLink: `${process.env.NEXTAUTH_URL || ""}/book?session=${sid}`,
               },
             })
           }

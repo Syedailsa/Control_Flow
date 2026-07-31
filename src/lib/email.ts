@@ -114,8 +114,9 @@ export function getEmailTemplate(type: EmailType, data: Record<string, string>):
             <p style="margin:0 0 8px;color:#666;font-size:13px;"><strong>Time:</strong> ${callTime}</p>
             <p style="margin:0;color:#666;font-size:13px;"><strong>Duration:</strong> 30 minutes</p>
           </td></tr></table>` +
-          (meetLink ? paragraph(`Your meeting link: <a href="${meetLink}" style="color:#F7931E;font-weight:600;">${meetLink}</a>`) : "") +
-          paragraph("A calendar invite is on its way with all the details. If you need to reschedule, just reply to this email and we'll take care of it.") +
+          (meetLink ? paragraph(`Your meeting link: <a href="${meetLink}" style="color:#F7931E;font-weight:600;">${meetLink}</a>`) + button(meetLink, "Join the Call") : "") +
+          (calendarLink ? button(calendarLink, "View Calendar Invite") : "") +
+          paragraph("If you need to reschedule, just reply to this email and we'll take care of it.") +
           paragraph("We look forward to speaking with you soon!") +
           paragraph("Warm regards,<br><strong>Your CoachFlow Team</strong>"),
           name

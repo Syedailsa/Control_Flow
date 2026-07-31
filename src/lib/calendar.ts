@@ -141,9 +141,6 @@ export async function createCalendarEvent(params: {
         dateTime: params.end.toISOString(),
         timeZone: COACH_TIMEZONE,
       },
-      attendees: params.attendeeEmail
-        ? [{ email: params.attendeeEmail, displayName: params.attendeeName }]
-        : [],
       conferenceData: {
         createRequest: {
           requestId: `coachflow-${Date.now()}`,
@@ -159,12 +156,29 @@ export async function createCalendarEvent(params: {
       },
     }
 
-    const res = await calendar.events.insert({
-      calendarId: CALENDAR_ID,
-      requestBody: event,
-      conferenceDataVersion: 1,
-      sendUpdates: "all",
-    })
+    let res
+    try {
+      res = await calendar.events.insert({
+        calendarId: CALENDAR_ID,
+        requestBody: event,
+        conferenceDataVersion: 1,
+        sendUpdates: "all",
+      })
+    } catch {
+      // Meet conference creation is not supported on consumer calendars via
+      // service accounts. Retry without it so bookings still succeed.
+      const { conferenceData: _omit, ...plainEvent } = event
+      res = await calendar.events.insert({
+        calendarId: CALENDAR_ID,
+        requestBody: plainEvent,
+        sendUpdates: "all",
+      })
+    }
+
+    // Attendees are intentionally not attached: service accounts cannot
+    // invite attendees without Domain-Wide Delegation, which consumer
+    // Gmail calendars cannot set up. The lead receives the event link via
+    // the SMTP confirmation email instead.
 
     return {
       eventId: res.data.id,

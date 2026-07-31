@@ -8,11 +8,44 @@ import { z } from "zod"
 export const runtime = "nodejs"
 
 const bookSchema = z.object({
-  leadId: z.string(),
+  leadId: z.string().optional(),
+  sessionId: z.string().optional(),
   start: z.string(),
   end: z.string().optional(),
   duration: z.number().min(15).max(120).optional().default(30),
 })
+
+export async function GET(request: NextRequest) {
+  const session = await auth()
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  try {
+    const leads = await prisma.lead.findMany({
+      where: { organizationId: session.user.organizationId },
+      orderBy: { appointmentTime: "desc" },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        company: true,
+        score: true,
+        status: true,
+        appointmentStatus: true,
+        appointmentTime: true,
+        calendlyEventUri: true,
+      },
+    })
+
+    const appointments = leads.filter((l) => l.appointmentTime)
+
+    return NextResponse.json({ appointments })
+  } catch (error) {
+    console.error("Appointments API error:", error)
+    return NextResponse.json({ error: "Failed to fetch appointments" }, { status: 500 })
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,9 +56,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 })
     }
 
-    const { leadId, start, duration } = parsed.data
+    const { leadId, sessionId, start, duration } = parsed.data
 
-    const lead = await prisma.lead.findUnique({ where: { id: leadId } })
+    const lead = leadId
+      ? await prisma.lead.findUnique({ where: { id: leadId } })
+      : sessionId
+      ? await prisma.lead.findUnique({ where: { sessionId } })
+      : null
+
     if (!lead) {
       return NextResponse.json({ error: "Lead not found" }, { status: 404 })
     }
@@ -55,7 +93,7 @@ export async function POST(request: NextRequest) {
     })
 
     await prisma.lead.update({
-      where: { id: leadId },
+      where: { id: lead.id },
       data: {
         appointmentTime: startDate,
         appointmentStatus: "CONFIRMED",

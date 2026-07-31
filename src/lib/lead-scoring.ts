@@ -14,6 +14,7 @@ export interface QualificationData {
   conversationSummary: string
   interestLevel: "HIGH" | "MEDIUM" | "LOW"
   bookedAppointment: boolean
+  agreedToCall: boolean
   needHumanHandoff: boolean
 }
 
@@ -111,6 +112,7 @@ export function scoreLead(data: Partial<QualificationData>): {
   if (data.name || data.email || data.phone) engagement += 5
   if (data.interestLevel === "HIGH") engagement += 5
   if (data.bookedAppointment) engagement += 5
+  if (data.agreedToCall) engagement += 5
 
   const total = Math.min(
     100,
