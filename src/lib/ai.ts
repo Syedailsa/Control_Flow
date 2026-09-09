@@ -1,5 +1,12 @@
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-const MODEL = process.env.OPENROUTER_MODEL || "openai/gpt-oss-20b:free"
+
+// Free tier models (all available via OPENROUTER_MODEL env var):
+//   nvidia/nemotron-3-super-120b-a12b:free        (default, 120B params, reliable)
+//   nvidia/nemotron-3-ultra-550b-a55b:free         (550B params, strongest)
+//   nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free (30B, reasoning-focused)
+//   google/gemma-4-31b-it:free                     (31B, rate-limited)
+//   openai/gpt-oss-20b                             (paid, check OpenRouter for pricing)
+const MODEL = process.env.OPENROUTER_MODEL || "nvidia/nemotron-3-super-120b-a12b:free"
 
 export interface ChatMessage {
   role: "system" | "user" | "assistant"
