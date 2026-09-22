@@ -34,8 +34,8 @@ export default function ChatWidget() {
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "fixed bottom-6 right-4 sm:right-6 z-50 w-14 h-14 rounded-2xl flex items-center justify-center",
-          "bg-gradient-to-br from-primary to-purple-600 text-white",
-          "shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40",
+          "bg-gradient-to-br from-indigo-500 to-purple-600 text-white",
+          "shadow-lg shadow-indigo-300/50 hover:shadow-xl hover:shadow-indigo-400/50",
           "transition-shadow duration-300"
         )}
         aria-label="Chat with us"
