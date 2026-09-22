@@ -13,6 +13,44 @@ import { Prisma } from "@/generated/prisma/client"
 
 export const runtime = "nodejs"
 
+function stripReasoning(text: string): string {
+  if (!text) return text
+  let cleaned = text
+
+  // Remove everything before the first actual sentence if it looks like reasoning
+  // Pattern: lines starting with thinking markers before actual content
+  const lines = cleaned.split('\n')
+  let startIdx = 0
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim()
+    // Skip lines that are clearly internal reasoning
+    if (
+      /^(First|Okay|Hmm|Wait|Ah|Note|So|Now|Let me|I need to|I should|Looking at|The user|But|However|Actually|Based on|According|Following|My plan|Step \d|Rule:|Guideline:|IMPORTANT)/i.test(line) ||
+      /^\d+\.\s+\*{0,2}(Analyze|Consider|Check|Greet|Understand|Present|Follow|Ensure|Make sure|Remember|The goal|Key point)/i.test(line) ||
+      /\*\*[^*]+\*\*:?\s/i.test(line)
+    ) {
+      startIdx = i + 1
+      continue
+    }
+    // If line looks like actual content (starts with greeting, answer, etc.), stop skipping
+    if (line.length > 0 && startIdx > 0) break
+  }
+  if (startIdx > 0 && startIdx < lines.length) {
+    cleaned = lines.slice(startIdx).join('\n').trim()
+  }
+
+  // Remove common reasoning patterns
+  cleaned = cleaned.replace(/^(Here'?s?\s+(a|my|the)\s+(thinking|reasoning|analysis|thought)\s+process[^:]*:\s*\n?)/im, '')
+  cleaned = cleaned.replace(/<thinking>[\s\S]*?<\/thinking>/gi, '')
+  cleaned = cleaned.replace(/\n{3,}/g, '\n\n').trim()
+
+  // If nothing meaningful left, return a fallback
+  if (cleaned.length < 10) {
+    return "I'd be happy to help you with that! Could you tell me a bit more about what you're looking for?"
+  }
+  return cleaned
+}
+
 const chatRequestSchema = z.object({
   sessionId: z.string().optional(),
   message: z.string().min(1).max(2000),
@@ -87,6 +125,9 @@ export async function POST(request: NextRequest) {
 
     const aiResponse = await chatCompletion(messages, { temperature: 0.7 })
 
+    // Strip leaked reasoning from response
+    const cleanResponse = stripReasoning(aiResponse.content)
+
     await prisma.conversation.createMany({
       data: [
         {
@@ -98,7 +139,7 @@ export async function POST(request: NextRequest) {
         {
           leadId: lead.id,
           role: "assistant",
-          content: aiResponse.content,
+          content: cleanResponse,
           metadata: { sessionId: sid },
         },
       ],
@@ -108,7 +149,7 @@ export async function POST(request: NextRequest) {
     let scoreResult = null
     let handoffNeeded = false
 
-    const transcript = [...historyMessages, { role: "user" as const, content: message }, { role: "assistant" as const, content: aiResponse.content }]
+    const transcript = [...historyMessages, { role: "user" as const, content: message }, { role: "assistant" as const, content: cleanResponse }]
       .map((m) => `${m.role.toUpperCase()}: ${m.content}`)
       .join("\n\n")
 
@@ -208,7 +249,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({
-      response: aiResponse.content,
+      response: cleanResponse,
       sessionId: sid,
       leadId: lead.id,
       qualification,
