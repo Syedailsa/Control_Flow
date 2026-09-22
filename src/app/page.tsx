@@ -11,10 +11,10 @@ import {
   Calendar,
   Shield,
   Zap,
-  Users,
-  TrendingUp,
-  CheckCircle2,
   ChevronDown,
+  Bot,
+  Clock,
+  Target,
 } from "lucide-react"
 import ShimmerButton from "@/components/ui/shimmer-button"
 import GlowCard from "@/components/ui/glow-card"
@@ -29,7 +29,7 @@ const fadeUp = {
 
 const stagger = {
   animate: {
-    transition: { staggerChildren: 0.12 },
+    transition: { staggerChildren: 0.1 },
   },
 }
 
@@ -38,37 +38,43 @@ const features = [
     icon: MessageCircle,
     title: "AI Chat Assistant",
     desc: "Engage prospects naturally with human-like conversation that qualifies and converts — 24/7.",
-    color: "from-primary to-purple-600",
+    gradient: "from-indigo-500 to-purple-600",
+    number: "01",
   },
   {
     icon: Sparkles,
     title: "Smart Lead Scoring",
     desc: "Automatically score leads as Hot, Warm, or Cold based on conversation intelligence.",
-    color: "from-amber-500 to-orange-500",
+    gradient: "from-amber-500 to-orange-500",
+    number: "02",
   },
   {
     icon: Calendar,
     title: "Instant Booking",
     desc: "Book discovery calls directly from chat — no back-and-forth emails needed.",
-    color: "from-emerald-500 to-teal-500",
+    gradient: "from-emerald-500 to-teal-500",
+    number: "03",
   },
   {
     icon: BarChart3,
     title: "Real-time Analytics",
     desc: "Track conversations, conversion rates, and team performance in one dashboard.",
-    color: "from-blue-500 to-indigo-500",
+    gradient: "from-blue-500 to-indigo-500",
+    number: "04",
   },
   {
     icon: Shield,
     title: "Human Handoff",
     desc: "Seamlessly escalate complex queries to your team when the AI detects the need.",
-    color: "from-rose-500 to-pink-500",
+    gradient: "from-rose-500 to-pink-500",
+    number: "05",
   },
   {
     icon: Zap,
     title: "Knowledge Base",
     desc: "Feed your FAQs and the AI searches them instantly to answer visitor questions.",
-    color: "from-violet-500 to-purple-500",
+    gradient: "from-violet-500 to-purple-500",
+    number: "06",
   },
 ]
 
@@ -77,16 +83,19 @@ const steps = [
     step: "01",
     title: "Visitor Lands on Your Site",
     desc: "The AI chat widget greets them instantly with a personalized message.",
+    icon: Target,
   },
   {
     step: "02",
     title: "AI Qualifies the Lead",
     desc: "Natural conversation extracts key info: needs, budget, timeline, and decision role.",
+    icon: Bot,
   },
   {
     step: "03",
     title: "Book & Convert",
     desc: "Qualified leads book a discovery call on your Google Calendar — automatically.",
+    icon: Clock,
   },
 ]
 
@@ -209,7 +218,7 @@ export default function Home() {
         </section>
 
         {/* Stats Section */}
-        <section className="py-16 border-y border-border bg-card/50">
+        <section className="py-16 border-y border-border bg-muted/30">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               variants={stagger}
@@ -232,8 +241,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Features Section */}
-        <section id="features" className="py-24">
+        {/* Features Section — 21st.dev bento style */}
+        <section id="features" className="py-24 bg-muted/30">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -241,6 +250,15 @@ export default function Home() {
               viewport={{ once: true }}
               className="text-center mb-16"
             >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold mb-4"
+              >
+                <Sparkles className="w-3 h-3" />
+                FEATURES
+              </motion.div>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
                 Everything You Need to{" "}
                 <span className="text-gradient-brand">Scale</span>
@@ -251,30 +269,37 @@ export default function Home() {
               </p>
             </motion.div>
 
-            <motion.div
-              variants={stagger}
-              initial="initial"
-              whileInView="animate"
-              viewport={{ once: true }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            >
-              {features.map((feature) => (
-                <motion.div key={feature.title} variants={fadeUp}>
-                  <GlowCard className="h-full group">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300`}>
-                      <feature.icon className="w-6 h-6 text-white" />
+            {/* Bento grid — 2 col large + 1 col small pattern */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {features.map((feature, i) => (
+                <motion.div
+                  key={feature.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.08 }}
+                >
+                  <GlowCard className="h-full group relative overflow-hidden">
+                    {/* Number watermark */}
+                    <div className="absolute -top-4 -right-2 text-8xl font-black text-primary/[0.03] select-none pointer-events-none">
+                      {feature.number}
                     </div>
-                    <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">{feature.desc}</p>
+                    <div className="relative z-10">
+                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                        <feature.icon className="w-6 h-6 text-white" />
+                      </div>
+                      <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+                      <p className="text-muted-foreground text-sm leading-relaxed">{feature.desc}</p>
+                    </div>
                   </GlowCard>
                 </motion.div>
               ))}
-            </motion.div>
+            </div>
           </div>
         </section>
 
         {/* How It Works */}
-        <section id="how-it-works" className="py-24 bg-muted/30">
+        <section id="how-it-works" className="py-24 bg-background">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -282,6 +307,15 @@ export default function Home() {
               viewport={{ once: true }}
               className="text-center mb-16"
             >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold mb-4"
+              >
+                <Zap className="w-3 h-3" />
+                HOW IT WORKS
+              </motion.div>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
                 How It <span className="text-gradient-brand">Works</span>
               </h2>
@@ -290,7 +324,10 @@ export default function Home() {
               </p>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+              {/* Connecting line */}
+              <div className="hidden md:block absolute top-16 left-[20%] right-[20%] h-px bg-gradient-to-r from-primary/20 via-primary/40 to-primary/20" />
+
               {steps.map((step, i) => (
                 <motion.div
                   key={step.step}
@@ -298,19 +335,18 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.15 }}
-                  className="relative"
+                  className="relative text-center"
                 >
-                  <div className="text-7xl font-black text-primary/5 absolute -top-4 -left-2">{step.step}</div>
-                  <div className="relative pt-8 pl-4">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white font-bold text-sm mb-4 shadow-lg shadow-primary/25">
-                      {step.step}
+                  <div className="relative inline-flex mb-6">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white shadow-lg shadow-primary/25">
+                      <step.icon className="w-7 h-7" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">{step.desc}</p>
+                    <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-background border-2 border-primary flex items-center justify-center">
+                      <span className="text-xs font-bold text-primary">{step.step}</span>
+                    </div>
                   </div>
-                  {i < steps.length - 1 && (
-                    <div className="hidden md:block absolute top-12 left-full w-full h-px bg-gradient-to-r from-primary/20 to-transparent" />
-                  )}
+                  <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed max-w-xs mx-auto">{step.desc}</p>
                 </motion.div>
               ))}
             </div>

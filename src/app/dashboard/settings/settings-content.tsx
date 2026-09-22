@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
-import { Settings, Bot, Database, Calendar, Mail, Save, CheckCircle2, XCircle } from "lucide-react"
-import { useState } from "react"
+import { Settings, Bot, Database, Calendar, Mail, Save, CheckCircle2, XCircle, Sun, Moon } from "lucide-react"
+import { useState, useEffect } from "react"
+import ThemeToggle from "@/components/ui/theme-toggle"
 
 const integrations = [
   { name: "AI Provider", detail: "OpenRouter — nvidia/nemotron-3-super-120b-a12b:free", icon: Bot, connected: true },
@@ -102,6 +103,24 @@ export default function SettingsContent() {
 
         {/* Integration status sidebar */}
         <div className="space-y-4">
+          {/* Theme Toggle */}
+          <Card className="border-border/50">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Moon className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Appearance</p>
+                    <p className="text-xs text-muted-foreground">Toggle dark mode</p>
+                  </div>
+                </div>
+                <ThemeToggle />
+              </div>
+            </CardContent>
+          </Card>
+
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Integrations</h3>
           {integrations.map((integration, i) => (
             <motion.div
