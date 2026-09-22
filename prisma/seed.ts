@@ -41,6 +41,13 @@ async function main() {
     skipDuplicates: true,
     data: [
       {
+        question: "What does CoachFlow do?",
+        answer:
+          "CoachFlow is an AI-powered platform that automates lead qualification, appointment booking, and client management for coaches and service providers. It includes an AI chat widget that engages visitors 24/7, automatically qualifies leads, books discovery calls on your Google Calendar, sends confirmation emails, and tracks everything in a CRM dashboard — all on autopilot.",
+        category: "services",
+        tags: ["platform", "automation", "lead", "overview"],
+      },
+      {
         question: "What coaching services do you offer?",
         answer:
           "We offer one-on-one executive coaching, group coaching programs, leadership development programs, business consulting, and online masterclasses. Each program is tailored to help professionals and business owners achieve breakthrough results.",
@@ -48,9 +55,23 @@ async function main() {
         tags: ["services", "programs", "coaching"],
       },
       {
-        question: "How much does coaching cost?",
+        question: "Can you build a custom lead flow for my business?",
         answer:
-          "Our pricing varies based on the program and duration. One-on-one coaching packages start from $500/session, group programs start from $200/month, and masterclasses are typically $97-297. We recommend booking a free discovery call to find the best fit for your needs and budget.",
+          "Absolutely! That's exactly what CoachFlow does. We set up an AI-powered lead flow where your website visitors or DM contacts are automatically engaged, qualified, and routed to your CRM or Google Sheets. You get real-time tracking of who to respond to urgently, automated follow-ups, and appointment booking — all without manual work. Book a free discovery call and we'll build your custom lead flow.",
+        category: "services",
+        tags: ["custom", "lead flow", "automation", "DM", "CRM", "sheets"],
+      },
+      {
+        question: "How do DMs and leads get tracked?",
+        answer:
+          "CoachFlow captures every lead that interacts with your AI chat widget or sends a DM. Each conversation is logged, the lead is automatically scored (HOT/WARM/COLD), and all details — name, email, goals, challenges — are stored in your CRM dashboard. You can also integrate with Google Sheets for real-time tracking. You'll always know who to respond to and when.",
+        category: "services",
+        tags: ["DM", "tracking", "CRM", "sheets", "lead management"],
+      },
+      {
+        question: "How much does it cost?",
+        answer:
+          "Our pricing varies based on the program and duration. One-on-one coaching packages start from $500/session, group programs start from $200/month, and masterclasses are typically $97-297. Custom lead automation setups are discussed during your free discovery call. We recommend booking a call to find the best fit for your needs and budget.",
         category: "pricing",
         tags: ["pricing", "cost", "investment"],
       },
@@ -64,7 +85,7 @@ async function main() {
       {
         question: "Do you offer a free consultation?",
         answer:
-          "Yes! We offer a free 30-minute discovery call where we discuss your goals, challenges, and determine if our coaching is the right fit. There's absolutely no obligation — it's simply an opportunity to explore how we can help you grow.",
+          "Yes! We offer a free 30-minute discovery call where we discuss your goals, challenges, and determine if CoachFlow is the right fit. There's absolutely no obligation — it's simply an opportunity to explore how we can help you automate your lead flow and grow your business.",
         category: "general",
         tags: ["free", "consultation", "discovery call"],
       },
@@ -76,9 +97,9 @@ async function main() {
         tags: ["one-on-one", "group", "difference", "comparison"],
       },
       {
-        question: "Who is coaching for?",
+        question: "Who is CoachFlow for?",
         answer:
-          "Our coaching is designed for executives, business owners, entrepreneurs, and high-performing professionals who want to accelerate their growth, overcome obstacles, and achieve specific goals. Whether you're looking to scale your business, improve leadership skills, or find better work-life balance, we have a program for you.",
+          "CoachFlow is designed for coaches, consultants, service providers, agencies, and business owners who want to capture leads automatically, qualify them without manual effort, book discovery calls on autopilot, and keep track of who to respond to. Whether you're a solo coach or running a team, we have a solution for you.",
         category: "general",
         tags: ["who", "audience", "eligibility"],
       },
@@ -90,7 +111,7 @@ async function main() {
         tags: ["online", "in-person", "format", "location"],
       },
       {
-        question: "What results can I expect from coaching?",
+        question: "What results can I expect?",
         answer:
           "Results vary by individual, but our clients typically report improved leadership effectiveness, clearer strategic direction, increased revenue and profitability, better work-life balance, enhanced communication skills, and greater overall confidence. We work with you to define and track specific measurable outcomes.",
         category: "general",
