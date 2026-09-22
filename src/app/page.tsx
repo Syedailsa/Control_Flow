@@ -120,33 +120,39 @@ export default function Home() {
       <Header />
 
       <main className="flex-1">
-        {/* Hero Section */}
-        <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
-          {/* Animated mesh gradient background */}
-          <div className="absolute inset-0 gradient-mesh animate-gradient-shift" style={{ backgroundSize: "200% 200%" }} />
+        {/* Hero Section — Dark background */}
+        <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[oklch(0.13_0.025_270)]">
+          {/* Animated gradient background */}
+          <div className="absolute inset-0">
+            <div className="absolute inset-0 bg-gradient-to-br from-[oklch(0.25_0.08_270)] via-[oklch(0.18_0.04_290)] to-[oklch(0.12_0.03_270)]" />
+            <div className="absolute inset-0 animate-gradient-shift" style={{
+              backgroundSize: "200% 200%",
+              background: "linear-gradient(135deg, oklch(0.25 0.08 270 / 0.8) 0%, oklch(0.18 0.04 290 / 0.6) 50%, oklch(0.12 0.03 270 / 0.8) 100%)",
+            }} />
+          </div>
 
           {/* Floating orbs */}
           <div className="absolute inset-0 overflow-hidden">
             <motion.div
               animate={{ y: [-20, 20, -20], x: [-10, 10, -10] }}
               transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-1/4 left-1/6 w-72 h-72 bg-primary/10 rounded-full blur-3xl"
+              className="absolute top-1/4 left-1/6 w-72 h-72 bg-indigo-500/20 rounded-full blur-3xl"
             />
             <motion.div
               animate={{ y: [20, -20, 20], x: [10, -10, 10] }}
               transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute bottom-1/4 right-1/6 w-96 h-96 bg-accent/10 rounded-full blur-3xl"
+              className="absolute bottom-1/4 right-1/6 w-96 h-96 bg-purple-500/15 rounded-full blur-3xl"
             />
             <motion.div
               animate={{ y: [10, -30, 10] }}
               transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-1/3 right-1/3 w-64 h-64 bg-purple-500/8 rounded-full blur-3xl"
+              className="absolute top-1/3 right-1/3 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl"
             />
           </div>
 
           {/* Grid pattern overlay */}
-          <div className="absolute inset-0 opacity-[0.03]" style={{
-            backgroundImage: "linear-gradient(oklch(0.45 0.18 270) 1px, transparent 1px), linear-gradient(90deg, oklch(0.45 0.18 270) 1px, transparent 1px)",
+          <div className="absolute inset-0 opacity-[0.06]" style={{
+            backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
             backgroundSize: "60px 60px",
           }} />
 
@@ -164,22 +170,24 @@ export default function Home() {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 dark:bg-background/60 backdrop-blur-sm border border-primary/10 shadow-sm mb-8"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 shadow-sm mb-8"
               >
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-sm font-medium text-foreground/80">
+                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-sm font-medium text-white/80">
                   AI-Powered Lead Qualification
                 </span>
               </motion.div>
 
               {/* Heading */}
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 leading-[1.1]">
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 leading-[1.1] text-white">
                 Never Miss a{" "}
-                <span className="text-gradient-brand">Qualified Lead</span>
+                <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-amber-400 bg-clip-text text-transparent">
+                  Qualified Lead
+                </span>
                 {" "}Again
               </h1>
 
-              <p className="max-w-2xl mx-auto text-lg sm:text-xl text-muted-foreground mb-10 leading-relaxed">
+              <p className="max-w-2xl mx-auto text-lg sm:text-xl text-white/60 mb-10 leading-relaxed">
                 CoachFlow AI automates lead qualification, answers FAQs, books
                 discovery calls, and syncs your CRM — so you can focus on
                 coaching, not admin work.
@@ -187,13 +195,13 @@ export default function Home() {
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link href="/login">
-                  <ShimmerButton size="lg" className="px-8 py-6 text-lg">
+                  <ShimmerButton size="lg" className="px-8 py-6 text-lg bg-white text-[oklch(0.13_0.025_270)] hover:bg-white/90 shadow-2xl shadow-white/10">
                     Start Free Trial
                     <ArrowRight className="w-5 h-5" />
                   </ShimmerButton>
                 </Link>
                 <Link href="#features">
-                  <ShimmerButton variant="outline" size="lg" className="px-8 py-6 text-lg">
+                  <ShimmerButton variant="outline" size="lg" className="px-8 py-6 text-lg border-white/20 text-white hover:bg-white/10">
                     See Features
                   </ShimmerButton>
                 </Link>
@@ -211,14 +219,14 @@ export default function Home() {
                 animate={{ y: [0, 8, 0] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                <ChevronDown className="w-6 h-6 text-muted-foreground/50" />
+                <ChevronDown className="w-6 h-6 text-white/30" />
               </motion.div>
             </motion.div>
           </motion.div>
         </section>
 
         {/* Stats Section */}
-        <section className="py-16 border-y border-border bg-muted/30">
+        <section className="py-16 border-y border-white/10 bg-[oklch(0.15_0.03_270)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               variants={stagger}
@@ -233,8 +241,8 @@ export default function Home() {
                   variants={fadeUp}
                   className="text-center"
                 >
-                  <div className="text-3xl sm:text-4xl font-bold text-gradient-brand">{stat.value}</div>
-                  <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+                  <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-amber-400 bg-clip-text text-transparent">{stat.value}</div>
+                  <p className="text-sm text-white/50 mt-1">{stat.label}</p>
                 </motion.div>
               ))}
             </motion.div>

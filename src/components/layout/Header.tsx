@@ -37,7 +37,7 @@ export default function Header() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="h-16 flex items-center justify-between">
-          <AnimatedLogo size="md" />
+          <AnimatedLogo size="md" dark={!scrolled} />
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-1">
@@ -45,22 +45,36 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="relative px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg group"
+                className={cn(
+                  "relative px-4 py-2 text-sm font-medium transition-colors rounded-lg group",
+                  scrolled
+                    ? "text-muted-foreground hover:text-foreground"
+                    : "text-white/70 hover:text-white"
+                )}
               >
                 {link.label}
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-primary to-purple-600 rounded-full group-hover:w-6 transition-all duration-300" />
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full group-hover:w-6 transition-all duration-300" />
               </Link>
             ))}
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
             <Link href="/login">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+              <Button variant="ghost" size="sm" className={cn(
+                scrolled
+                  ? "text-muted-foreground hover:text-foreground"
+                  : "text-white/70 hover:text-white"
+              )}>
                 Sign In
               </Button>
             </Link>
             <Link href="/login">
-              <Button size="sm" className="bg-gradient-to-r from-primary to-purple-600 text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 gap-1.5">
+              <Button size="sm" className={cn(
+                "gap-1.5 shadow-lg",
+                scrolled
+                  ? "bg-gradient-to-r from-primary to-purple-600 text-white shadow-primary/25"
+                  : "bg-white text-[oklch(0.13_0.025_270)] hover:bg-white/90 shadow-white/10"
+              )}>
                 Get Started
                 <ArrowRight className="w-3.5 h-3.5" />
               </Button>
@@ -71,7 +85,7 @@ export default function Header() {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className={cn("md:hidden", scrolled ? "text-foreground" : "text-white")}
             onClick={() => setMobileOpen(!mobileOpen)}
           >
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
