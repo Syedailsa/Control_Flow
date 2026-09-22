@@ -1,6 +1,6 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut, useSession } from "next-auth/react"
@@ -12,17 +12,19 @@ import {
   BookOpen,
   Settings,
   LogOut,
-  Sparkles,
   ChevronLeft,
   ChevronRight,
   Menu,
   X,
+  Sun,
+  Moon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { SessionProvider } from "next-auth/react"
+import AnimatedLogo from "@/components/ui/animated-logo"
 
 const navItems = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
@@ -33,6 +35,32 @@ const navItems = [
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ]
 
+function ThemeToggle() {
+  const [dark, setDark] = useState(false)
+
+  useEffect(() => {
+    setDark(document.documentElement.classList.contains("dark"))
+  }, [])
+
+  const toggle = () => {
+    const next = !dark
+    setDark(next)
+    document.documentElement.classList.toggle("dark", next)
+    localStorage.setItem("coachflow-theme", next ? "dark" : "light")
+  }
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={toggle}
+      className="h-9 w-9 text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+    >
+      {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+    </Button>
+  )
+}
+
 function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
   const pathname = usePathname()
   const { data: session } = useSession()
@@ -41,28 +69,46 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-40 h-full bg-white border-r border-border transition-all duration-300 flex flex-col",
-        collapsed ? "w-16" : "w-64"
+        "fixed left-0 top-0 z-40 h-full flex flex-col",
+        "bg-sidebar border-r border-sidebar-border transition-all duration-300 ease-in-out",
+        collapsed ? "w-[68px]" : "w-64"
       )}
     >
-      <div className="flex items-center justify-between p-4 border-b border-border">
-        {!collapsed && (
-          <Link href="/" className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-orange-500" />
-            <span className="font-bold text-gradient-warm">CoachFlow</span>
-          </Link>
+      {/* Logo */}
+      <div className="flex items-center justify-between h-16 px-4 border-b border-sidebar-border">
+        <AnimatePresence mode="wait">
+          {!collapsed && (
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              <AnimatedLogo size="sm" dark />
+            </motion.div>
+          )}
+        </AnimatePresence>
+        {collapsed && (
+          <div className="mx-auto">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center">
+              <span className="text-white font-bold text-sm">C</span>
+            </div>
+          </div>
         )}
-        {collapsed && <Sparkles className="w-5 h-5 text-orange-500 mx-auto" />}
         <Button
           variant="ghost"
           size="icon"
           onClick={onToggle}
-          className={cn("h-8 w-8", collapsed && "mx-auto mt-2")}
+          className={cn(
+            "h-8 w-8 text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent",
+            collapsed && "mx-auto mt-2"
+          )}
         >
           {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </Button>
       </div>
 
+      {/* Navigation */}
       <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
@@ -71,41 +117,62 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                "group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
                 isActive
-                  ? "bg-gradient-to-r from-orange-50 to-amber-50 text-orange-700 border border-orange-200"
-                  : "text-gray-600 hover:bg-orange-50 hover:text-orange-600"
+                  ? "bg-sidebar-accent text-sidebar-primary-foreground"
+                  : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
               )}
             >
-              <item.icon className="w-5 h-5 flex-shrink-0" />
-              {!collapsed && <span>{item.label}</span>}
+              {isActive && (
+                <motion.div
+                  layoutId="sidebar-active"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-gradient-to-b from-primary to-purple-500"
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                />
+              )}
+              <item.icon className={cn("w-5 h-5 flex-shrink-0", isActive && "text-sidebar-primary")} />
+              {!collapsed && (
+                <motion.span
+                  initial={false}
+                  animate={{ opacity: 1 }}
+                  className="truncate"
+                >
+                  {item.label}
+                </motion.span>
+              )}
             </Link>
           )
         })}
       </nav>
 
-      <div className="p-3 border-t border-border">
+      {/* Theme toggle + User */}
+      <div className="p-3 border-t border-sidebar-border space-y-2">
+        <div className="flex items-center justify-center">
+          <ThemeToggle />
+        </div>
+
         <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
-          <Avatar className="h-8 w-8 border border-orange-200">
-            <AvatarFallback className="bg-gradient-to-br from-orange-400 to-amber-400 text-white text-xs">
+          <Avatar className="h-8 w-8 border-2 border-primary/20">
+            <AvatarFallback className="bg-gradient-to-br from-primary to-purple-600 text-white text-xs font-semibold">
               {initials}
             </AvatarFallback>
           </Avatar>
           {!collapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-black truncate">
+              <p className="text-sm font-medium text-sidebar-foreground truncate">
                 {session?.user?.name || "Coach"}
               </p>
-              <p className="text-xs text-gray-500 truncate">{session?.user?.email}</p>
+              <p className="text-xs text-sidebar-foreground/50 truncate">{session?.user?.email}</p>
             </div>
           )}
         </div>
+
         <Button
           variant="ghost"
           size="sm"
           onClick={() => signOut({ callbackUrl: "/" })}
           className={cn(
-            "w-full mt-2 text-gray-500 hover:text-red-500 hover:bg-red-50",
+            "w-full text-sidebar-foreground/50 hover:text-red-400 hover:bg-red-500/10 transition-colors",
             collapsed && "px-0 justify-center"
           )}
         >
@@ -127,41 +194,56 @@ export default function DashboardLayout({
 
   return (
     <SessionProvider>
-      <div className="min-h-screen bg-gray-50/50">
-        <div className="lg:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-white border-b border-border flex items-center justify-between px-4">
+      <div className="min-h-screen bg-background">
+        {/* Mobile header */}
+        <div className="lg:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-glass border-b border-border flex items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-orange-500" />
-            <span className="font-bold text-gradient-warm text-sm">CoachFlow</span>
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center">
+              <span className="text-white font-bold text-xs">C</span>
+            </div>
+            <span className="font-bold text-sm">Coach<span className="text-gradient-brand">Flow</span></span>
           </Link>
           <Button variant="ghost" size="icon" onClick={() => setMobileOpen(!mobileOpen)}>
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </Button>
         </div>
 
-        {mobileOpen && (
-          <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setMobileOpen(false)} />
-        )}
+        {/* Mobile overlay */}
+        <AnimatePresence>
+          {mobileOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm lg:hidden"
+              onClick={() => setMobileOpen(false)}
+            />
+          )}
+        </AnimatePresence>
 
+        {/* Mobile sidebar */}
         <div
           className={cn(
-            "fixed inset-y-0 left-0 z-40 w-64 bg-white border-r border-border transform transition-transform duration-300 lg:hidden",
+            "fixed inset-y-0 left-0 z-40 w-64 transform transition-transform duration-300 lg:hidden",
             mobileOpen ? "translate-x-0" : "-translate-x-full"
           )}
         >
           <Sidebar collapsed={false} onToggle={() => setMobileOpen(false)} />
         </div>
 
+        {/* Desktop sidebar */}
         <div className="hidden lg:block">
           <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
         </div>
 
+        {/* Main content */}
         <motion.main
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
           className={cn(
-            "transition-all duration-300 pt-14 lg:pt-0",
-            sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"
+            "transition-all duration-300 pt-14 lg:pt-0 min-h-screen",
+            sidebarCollapsed ? "lg:ml-[68px]" : "lg:ml-64"
           )}
         >
           <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">

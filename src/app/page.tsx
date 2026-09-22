@@ -1,9 +1,25 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, useScroll, useTransform } from "framer-motion"
 import Link from "next/link"
-import { ArrowRight, MessageCircle, Sparkles, BarChart3, Calendar, Shield } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useRef } from "react"
+import {
+  ArrowRight,
+  MessageCircle,
+  Sparkles,
+  BarChart3,
+  Calendar,
+  Shield,
+  Zap,
+  Users,
+  TrendingUp,
+  CheckCircle2,
+  ChevronDown,
+} from "lucide-react"
+import ShimmerButton from "@/components/ui/shimmer-button"
+import GlowCard from "@/components/ui/glow-card"
+import Header from "@/components/layout/Header"
+import Footer from "@/components/layout/Footer"
 import ChatWidget from "@/components/chat/ChatWidget"
 
 const fadeUp = {
@@ -13,7 +29,7 @@ const fadeUp = {
 
 const stagger = {
   animate: {
-    transition: { staggerChildren: 0.1 },
+    transition: { staggerChildren: 0.12 },
   },
 }
 
@@ -21,88 +37,140 @@ const features = [
   {
     icon: MessageCircle,
     title: "AI Chat Assistant",
-    desc: "Engage prospects naturally with human-like conversation",
+    desc: "Engage prospects naturally with human-like conversation that qualifies and converts — 24/7.",
+    color: "from-primary to-purple-600",
   },
   {
     icon: Sparkles,
-    title: "Lead Qualification",
-    desc: "Automatically score and classify leads as Hot, Warm, or Cold",
+    title: "Smart Lead Scoring",
+    desc: "Automatically score leads as Hot, Warm, or Cold based on conversation intelligence.",
+    color: "from-amber-500 to-orange-500",
   },
   {
     icon: Calendar,
-    title: "Smart Scheduling",
-    desc: "Book discovery calls without back-and-forth emails",
+    title: "Instant Booking",
+    desc: "Book discovery calls directly from chat — no back-and-forth emails needed.",
+    color: "from-emerald-500 to-teal-500",
   },
   {
     icon: BarChart3,
-    title: "Analytics Dashboard",
-    desc: "Track conversations, conversions, and team performance",
+    title: "Real-time Analytics",
+    desc: "Track conversations, conversion rates, and team performance in one dashboard.",
+    color: "from-blue-500 to-indigo-500",
   },
   {
     icon: Shield,
     title: "Human Handoff",
-    desc: "Seamlessly escalate to your team when needed",
+    desc: "Seamlessly escalate complex queries to your team when the AI detects the need.",
+    color: "from-rose-500 to-pink-500",
+  },
+  {
+    icon: Zap,
+    title: "Knowledge Base",
+    desc: "Feed your FAQs and the AI searches them instantly to answer visitor questions.",
+    color: "from-violet-500 to-purple-500",
   },
 ]
 
+const steps = [
+  {
+    step: "01",
+    title: "Visitor Lands on Your Site",
+    desc: "The AI chat widget greets them instantly with a personalized message.",
+  },
+  {
+    step: "02",
+    title: "AI Qualifies the Lead",
+    desc: "Natural conversation extracts key info: needs, budget, timeline, and decision role.",
+  },
+  {
+    step: "03",
+    title: "Book & Convert",
+    desc: "Qualified leads book a discovery call on your Google Calendar — automatically.",
+  },
+]
+
+const stats = [
+  { value: "500+", label: "Coaches Using CoachFlow" },
+  { value: "50k+", label: "Leads Qualified" },
+  { value: "2.5x", label: "Higher Conversion Rate" },
+  { value: "20+", label: "Hours Saved Per Week" },
+]
+
 export default function Home() {
+  const heroRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  })
+  const heroOpacity = useTransform(scrollYProgress, [0, 1], [1, 0])
+  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.95])
+
   return (
     <div className="flex flex-col min-h-screen">
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-border"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <span className="text-xl font-bold text-gradient-warm">CoachFlow AI</span>
-          <div className="flex items-center gap-4">
-            <Link href="/login">
-              <Button variant="ghost">Sign In</Button>
-            </Link>
-            <Link href="/login">
-              <Button className="bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600">
-                Get Started
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </motion.header>
+      <Header />
 
       <main className="flex-1">
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-warm">
-          <div className="absolute inset-0 opacity-30">
-            <div className="absolute top-20 left-10 w-72 h-72 bg-orange-300 rounded-full blur-3xl" />
-            <div className="absolute bottom-20 right-10 w-96 h-96 bg-yellow-300 rounded-full blur-3xl" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-amber-200 rounded-full blur-3xl" />
+        {/* Hero Section */}
+        <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
+          {/* Animated mesh gradient background */}
+          <div className="absolute inset-0 gradient-mesh animate-gradient-shift" style={{ backgroundSize: "200% 200%" }} />
+
+          {/* Floating orbs */}
+          <div className="absolute inset-0 overflow-hidden">
+            <motion.div
+              animate={{ y: [-20, 20, -20], x: [-10, 10, -10] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-1/4 left-1/6 w-72 h-72 bg-primary/10 rounded-full blur-3xl"
+            />
+            <motion.div
+              animate={{ y: [20, -20, 20], x: [10, -10, 10] }}
+              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute bottom-1/4 right-1/6 w-96 h-96 bg-accent/10 rounded-full blur-3xl"
+            />
+            <motion.div
+              animate={{ y: [10, -30, 10] }}
+              transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-1/3 right-1/3 w-64 h-64 bg-purple-500/8 rounded-full blur-3xl"
+            />
           </div>
 
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
+          {/* Grid pattern overlay */}
+          <div className="absolute inset-0 opacity-[0.03]" style={{
+            backgroundImage: "linear-gradient(oklch(0.45 0.18 270) 1px, transparent 1px), linear-gradient(90deg, oklch(0.45 0.18 270) 1px, transparent 1px)",
+            backgroundSize: "60px 60px",
+          }} />
+
+          <motion.div
+            style={{ opacity: heroOpacity, scale: heroScale }}
+            className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center"
+          >
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             >
+              {/* Badge */}
               <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/75 backdrop-blur-sm border border-orange-300 shadow-sm mb-8"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 dark:bg-background/60 backdrop-blur-sm border border-primary/10 shadow-sm mb-8"
               >
-                <Sparkles className="w-4 h-4 text-orange-700" />
-                <span className="text-sm font-semibold text-orange-900">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-sm font-medium text-foreground/80">
                   AI-Powered Lead Qualification
                 </span>
               </motion.div>
 
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-black mb-6 leading-tight">
+              {/* Heading */}
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 leading-[1.1]">
                 Never Miss a{" "}
-                <span className="bg-gradient-to-r from-orange-700 to-amber-700 bg-clip-text text-transparent">
-                  Qualified Lead
-                </span>
+                <span className="text-gradient-brand">Qualified Lead</span>
                 {" "}Again
               </h1>
 
-              <p className="max-w-2xl mx-auto text-lg sm:text-xl text-gray-700 mb-10 leading-relaxed">
+              <p className="max-w-2xl mx-auto text-lg sm:text-xl text-muted-foreground mb-10 leading-relaxed">
                 CoachFlow AI automates lead qualification, answers FAQs, books
                 discovery calls, and syncs your CRM — so you can focus on
                 coaching, not admin work.
@@ -110,41 +178,74 @@ export default function Home() {
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link href="/login">
-                  <Button
-                    size="lg"
-                    className="bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600 shadow-lg shadow-orange-200 px-8 py-6 text-lg"
-                  >
+                  <ShimmerButton size="lg" className="px-8 py-6 text-lg">
                     Start Free Trial
-                    <ArrowRight className="ml-2 w-5 h-5" />
-                  </Button>
+                    <ArrowRight className="w-5 h-5" />
+                  </ShimmerButton>
                 </Link>
                 <Link href="#features">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="px-8 py-6 text-lg border-orange-300 text-orange-900 hover:bg-orange-50 font-semibold"
-                  >
+                  <ShimmerButton variant="outline" size="lg" className="px-8 py-6 text-lg">
                     See Features
-                  </Button>
+                  </ShimmerButton>
                 </Link>
               </div>
+            </motion.div>
+
+            {/* Scroll indicator */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.5 }}
+              className="absolute bottom-8 left-1/2 -translate-x-1/2"
+            >
+              <motion.div
+                animate={{ y: [0, 8, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <ChevronDown className="w-6 h-6 text-muted-foreground/50" />
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </section>
+
+        {/* Stats Section */}
+        <section className="py-16 border-y border-border bg-card/50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              variants={stagger}
+              initial="initial"
+              whileInView="animate"
+              viewport={{ once: true }}
+              className="grid grid-cols-2 md:grid-cols-4 gap-8"
+            >
+              {stats.map((stat) => (
+                <motion.div
+                  key={stat.label}
+                  variants={fadeUp}
+                  className="text-center"
+                >
+                  <div className="text-3xl sm:text-4xl font-bold text-gradient-brand">{stat.value}</div>
+                  <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+                </motion.div>
+              ))}
             </motion.div>
           </div>
         </section>
 
-        <section id="features" className="py-24 bg-white">
+        {/* Features Section */}
+        <section id="features" className="py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               className="text-center mb-16"
             >
-              <h2 className="text-3xl sm:text-4xl font-bold text-black mb-4">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
                 Everything You Need to{" "}
-                <span className="text-gradient-warm">Scale</span>
+                <span className="text-gradient-brand">Scale</span>
               </h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 From first touch to booked call — CoachFlow handles the journey
                 so your team only talks to qualified buyers.
               </p>
@@ -155,63 +256,100 @@ export default function Home() {
               initial="initial"
               whileInView="animate"
               viewport={{ once: true }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             >
               {features.map((feature) => (
-                <motion.div
-                  key={feature.title}
-                  variants={fadeUp}
-                  className="group relative p-8 rounded-2xl border border-orange-100 bg-gradient-to-br from-white to-orange-50 hover:shadow-xl hover:shadow-orange-100/50 transition-all duration-300"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-400 to-amber-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                    <feature.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-black mb-3">
-                    {feature.title}
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    {feature.desc}
-                  </p>
+                <motion.div key={feature.title} variants={fadeUp}>
+                  <GlowCard className="h-full group">
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300`}>
+                      <feature.icon className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">{feature.desc}</p>
+                  </GlowCard>
                 </motion.div>
               ))}
             </motion.div>
           </div>
         </section>
 
-        <section className="py-24 bg-gradient-warm">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        {/* How It Works */}
+        <section id="how-it-works" className="py-24 bg-muted/30">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+                How It <span className="text-gradient-brand">Works</span>
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Three simple steps to automate your entire lead flow.
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {steps.map((step, i) => (
+                <motion.div
+                  key={step.step}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.15 }}
+                  className="relative"
+                >
+                  <div className="text-7xl font-black text-primary/5 absolute -top-4 -left-2">{step.step}</div>
+                  <div className="relative pt-8 pl-4">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white font-bold text-sm mb-4 shadow-lg shadow-primary/25">
+                      {step.step}
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">{step.desc}</p>
+                  </div>
+                  {i < steps.length - 1 && (
+                    <div className="hidden md:block absolute top-12 left-full w-full h-px bg-gradient-to-r from-primary/20 to-transparent" />
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-24 relative overflow-hidden">
+          <div className="absolute inset-0 gradient-brand opacity-90" />
+          <div className="absolute inset-0 opacity-10" style={{
+            backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)",
+            backgroundSize: "32px 32px",
+          }} />
+
+          <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-3xl sm:text-4xl font-bold text-black mb-6">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
                 Ready to Automate Your Lead Flow?
               </h2>
-              <p className="text-lg text-gray-700 mb-10 max-w-2xl mx-auto">
+              <p className="text-lg text-white/80 mb-10 max-w-2xl mx-auto">
                 Join coaches who save 20+ hours per week on lead qualification
                 and double their conversion rates.
               </p>
               <Link href="/login">
-                <Button
-                  size="lg"
-                  className="bg-black text-white hover:bg-gray-800 shadow-xl px-10 py-6 text-lg"
-                >
+                <ShimmerButton size="lg" className="bg-white text-primary hover:bg-white/90 px-10 py-6 text-lg shadow-2xl">
                   Get Started Free
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
+                  <ArrowRight className="w-5 h-5" />
+                </ShimmerButton>
               </Link>
             </motion.div>
           </div>
         </section>
       </main>
 
-      <footer className="py-8 border-t border-border bg-white">
-        <div className="max-w-7xl mx-auto px-4 text-center text-sm text-gray-500">
-          &copy; {new Date().getFullYear()} CoachFlow AI. All rights reserved.
-        </div>
-      </footer>
-
+      <Footer />
       <ChatWidget />
     </div>
   )

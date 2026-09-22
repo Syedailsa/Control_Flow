@@ -4,8 +4,9 @@ import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { CalendarCheck, Clock, Loader2 } from "lucide-react"
+import { CalendarCheck, Clock, Loader2, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
 interface Slot {
@@ -52,7 +53,7 @@ export default function BookForm() {
           setDays(sdata.days || [])
         }
       } catch {
-        // ignore, page still renders slots area with error state
+        // ignore
       } finally {
         setLoading(false)
       }
@@ -91,17 +92,17 @@ export default function BookForm() {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="rounded-2xl border border-orange-100 bg-white shadow-xl shadow-orange-100/50 p-10 text-center"
+        className="rounded-2xl border border-border bg-card shadow-xl p-10 text-center"
       >
-        <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center mb-6">
-          <CalendarCheck className="w-8 h-8 text-white" />
+        <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mb-6 shadow-lg shadow-emerald-500/25">
+          <CheckCircle2 className="w-8 h-8 text-white" />
         </div>
-        <h1 className="text-2xl font-bold text-black mb-3">You&apos;re all booked!</h1>
-        <p className="text-gray-600 max-w-md mx-auto">
+        <h1 className="text-2xl font-bold mb-3">You&apos;re all booked!</h1>
+        <p className="text-muted-foreground max-w-md mx-auto">
           A confirmation email is on its way with your Google Meet link and call details. We look
           forward to speaking with you soon!
         </p>
-        <Link href="/" className="inline-block mt-8 text-sm font-medium text-orange-700 hover:underline">
+        <Link href="/" className="inline-block mt-8 text-sm font-medium text-primary hover:underline">
           Back to home
         </Link>
       </motion.div>
@@ -112,30 +113,30 @@ export default function BookForm() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl border border-orange-100 bg-white shadow-xl shadow-orange-100/50 p-6 sm:p-8"
+      className="rounded-2xl border border-border bg-card shadow-xl p-6 sm:p-8"
     >
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-black">
+        <h1 className="text-2xl font-bold">
           {leadName ? `Great, ${leadName}!` : "Pick a time for your"}
         </h1>
-        <p className="text-gray-600 mt-1">
+        <p className="text-muted-foreground mt-1">
           Choose a time for your free 30-minute discovery call. No obligation — just a conversation.
         </p>
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="w-8 h-8 animate-spin text-orange-400" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       ) : availableDays.length === 0 ? (
-        <p className="text-sm text-gray-400 py-10 text-center">
+        <p className="text-sm text-muted-foreground py-10 text-center">
           No available slots found. Please check back soon.
         </p>
       ) : (
         <>
           <div className="space-y-2 mb-6">
-            <label className="text-sm font-medium text-gray-600 flex items-center gap-1.5">
-              <CalendarCheck className="w-4 h-4 text-orange-500" /> Select Date
+            <label className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+              <CalendarCheck className="w-4 h-4 text-primary" /> Select Date
             </label>
             <div className="flex items-center gap-2 overflow-x-auto pb-1">
               {availableDays.map((d) => (
@@ -149,8 +150,8 @@ export default function BookForm() {
                   className={cn(
                     "flex-shrink-0 flex-col px-3 py-2 h-auto",
                     selectedDate === d.date
-                      ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white"
-                      : "border-orange-200 text-gray-600 hover:bg-orange-50"
+                      ? "bg-gradient-to-r from-primary to-purple-600 text-white shadow-lg shadow-primary/25"
+                      : "hover:bg-muted"
                   )}
                 >
                   <span className="text-[10px] uppercase opacity-80">
@@ -164,8 +165,8 @@ export default function BookForm() {
 
           {selectedDate && selectedDay && (
             <div className="space-y-2 mb-6">
-              <label className="text-sm font-medium text-gray-600 flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-orange-500" /> Select Time
+              <label className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                <Clock className="w-4 h-4 text-primary" /> Select Time
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {selectedDay.slots.map((slot) => (
@@ -176,8 +177,8 @@ export default function BookForm() {
                     onClick={() => setSelectedSlot(slot.start)}
                     className={cn(
                       selectedSlot === slot.start
-                        ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white"
-                        : "border-orange-200 text-gray-600 hover:bg-orange-50"
+                        ? "bg-gradient-to-r from-primary to-purple-600 text-white shadow-lg shadow-primary/25"
+                        : "hover:bg-muted"
                     )}
                   >
                     {formatTime(slot.start)}
@@ -190,13 +191,13 @@ export default function BookForm() {
           <Button
             onClick={handleBook}
             disabled={!selectedSlot || booking}
-            className="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600"
+            className="w-full bg-gradient-to-r from-primary to-purple-600 text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30"
           >
             {booking ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
             {booking ? "Booking..." : "Confirm Booking"}
           </Button>
 
-          {error && <p className="text-sm text-red-500 mt-3 text-center">{error}</p>}
+          {error && <p className="text-sm text-destructive mt-3 text-center">{error}</p>}
         </>
       )}
     </motion.div>

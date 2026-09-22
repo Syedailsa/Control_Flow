@@ -2,30 +2,23 @@
 
 import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Loader2, Plus, Search, Pencil, Trash2, Save, X, BookOpen, Tag } from "lucide-react"
-import { cn } from "@/lib/utils"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { BookOpen, Search, Plus, Tag, Edit2, Trash2 } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { TableSkeleton } from "@/components/ui/loading-skeleton"
+import EmptyState from "@/components/ui/empty-state"
 
 interface KBEntry {
   id: string
@@ -34,324 +27,189 @@ interface KBEntry {
   category: string
   tags: string[]
   active: boolean
-  createdAt: string
-  updatedAt: string
 }
 
-const EMPTY_FORM = {
-  question: "",
-  answer: "",
-  category: "general",
-  tags: "",
-  active: true,
+const categoryColors: Record<string, string> = {
+  general: "bg-primary/10 text-primary border-primary/20",
+  services: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+  pricing: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+  booking: "bg-blue-500/10 text-blue-500 border-blue-500/20",
 }
 
-export default function KnowledgeBasePage() {
+export default function KBContent() {
   const [entries, setEntries] = useState<KBEntry[]>([])
-  const [categories, setCategories] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
-  const [categoryFilter, setCategoryFilter] = useState("ALL")
+  const [category, setCategory] = useState("all")
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [saving, setSaving] = useState(false)
-  const [form, setForm] = useState(EMPTY_FORM)
+  const [editing, setEditing] = useState<KBEntry | null>(null)
+  const [form, setForm] = useState({ question: "", answer: "", category: "general", tags: "" })
 
-  async function fetchEntries() {
-    setLoading(true)
-    try {
-      const params = new URLSearchParams()
-      if (search) params.set("search", search)
-      if (categoryFilter !== "ALL") params.set("category", categoryFilter)
-
-      const res = await fetch(`/api/knowledge-base?${params.toString()}`)
-      const data = await res.json()
-      if (res.ok) {
-        setEntries(data.entries)
-        setCategories(data.categories)
-      }
-    } catch {
-      console.error("Failed to fetch entries")
-    } finally {
-      setLoading(false)
-    }
+  const fetchEntries = () => {
+    fetch("/api/knowledge-base")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setEntries(Array.isArray(data) ? data : data?.entries ?? []))
+      .finally(() => setLoading(false))
   }
 
-  useEffect(() => {
-    const timeout = setTimeout(fetchEntries, 300)
-    return () => clearTimeout(timeout)
-  }, [search, categoryFilter])
+  useEffect(() => { fetchEntries() }, [])
 
-  useEffect(() => {
-    fetchEntries()
-  }, [])
+  const filtered = entries.filter((e) => {
+    const matchSearch = !search || e.question.toLowerCase().includes(search.toLowerCase()) || e.answer.toLowerCase().includes(search.toLowerCase())
+    const matchCat = category === "all" || e.category === category
+    return matchSearch && matchCat
+  })
 
   function openCreate() {
-    setEditingId(null)
-    setForm(EMPTY_FORM)
+    setEditing(null)
+    setForm({ question: "", answer: "", category: "general", tags: "" })
     setDialogOpen(true)
   }
 
   function openEdit(entry: KBEntry) {
-    setEditingId(entry.id)
-    setForm({
-      question: entry.question,
-      answer: entry.answer,
-      category: entry.category,
-      tags: entry.tags.join(", "),
-      active: entry.active,
-    })
+    setEditing(entry)
+    setForm({ question: entry.question, answer: entry.answer, category: entry.category, tags: entry.tags.join(", ") })
     setDialogOpen(true)
   }
 
-  async function handleSave() {
-    if (!form.question.trim() || !form.answer.trim()) return
-    setSaving(true)
-    try {
-      const payload = {
-        question: form.question,
-        answer: form.answer,
-        category: form.category,
-        tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
-        active: form.active,
-      }
-
-      const url = editingId ? `/api/knowledge-base/${editingId}` : "/api/knowledge-base"
-      const method = editingId ? "PATCH" : "POST"
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
-
-      if (res.ok) {
-        setDialogOpen(false)
-        fetchEntries()
-      }
-    } catch {
-      console.error("Failed to save entry")
-    } finally {
-      setSaving(false)
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const body = { ...form, tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean) }
+    if (editing) {
+      await fetch(`/api/knowledge-base/${editing.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+    } else {
+      await fetch("/api/knowledge-base", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
     }
+    setDialogOpen(false)
+    fetchEntries()
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this knowledge base entry?")) return
-    try {
-      const res = await fetch(`/api/knowledge-base/${id}`, { method: "DELETE" })
-      if (res.ok) fetchEntries()
-    } catch {
-      console.error("Failed to delete entry")
-    }
-  }
-
-  async function toggleActive(entry: KBEntry) {
-    try {
-      const res = await fetch(`/api/knowledge-base/${entry.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ active: !entry.active }),
-      })
-      if (res.ok) fetchEntries()
-    } catch {
-      console.error("Failed to toggle entry")
-    }
+    await fetch(`/api/knowledge-base/${id}`, { method: "DELETE" })
+    fetchEntries()
   }
 
   return (
     <div className="space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-      >
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-black">Knowledge Base</h1>
-          <p className="text-gray-500 mt-1">Manage FAQs that power your AI assistant</p>
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold">Knowledge Base</h1>
+            <p className="text-muted-foreground mt-1">Manage FAQs that your AI assistant uses to answer questions.</p>
+          </div>
+          <Button onClick={openCreate} className="bg-gradient-to-r from-primary to-purple-600 text-white shadow-lg shadow-primary/25">
+            <Plus className="w-4 h-4 mr-2" /> Add Entry
+          </Button>
         </div>
-        <Button
-          onClick={openCreate}
-          className="bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Entry
-        </Button>
       </motion.div>
 
-      <Card className="border-orange-100">
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                placeholder="Search questions..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 border-orange-200"
-              />
-            </div>
-            <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v ?? "ALL")}>
-              <SelectTrigger className="w-full sm:w-40 border-orange-200">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">All Categories</SelectItem>
-                {categories.map((c) => (
-                  <SelectItem key={c} value={c}>{c}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="space-y-3">
-              {[0, 1, 2].map((i) => (
-                <Skeleton key={i} className="h-20 w-full" />
-              ))}
-            </div>
-          ) : entries.length === 0 ? (
-            <div className="flex items-center justify-center h-64 text-gray-400">
-              <div className="text-center">
-                <BookOpen className="w-10 h-10 mx-auto mb-3 text-gray-300" />
-                No entries yet. Add FAQs to help your AI assistant answer visitor questions.
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {entries.map((entry, i) => (
-                <motion.div
-                  key={entry.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.04 }}
-                  className={cn(
-                    "p-4 rounded-xl border transition-colors",
-                    entry.active ? "border-orange-100 bg-white" : "border-gray-200 bg-gray-50 opacity-60"
-                  )}
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-1.5">
-                        <h3 className="font-medium text-black text-sm">{entry.question}</h3>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-orange-100 text-orange-600 capitalize">
-                          {entry.category}
-                        </span>
-                        {!entry.active && (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-200 text-gray-500">
-                            Inactive
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-600 line-clamp-2">{entry.answer}</p>
-                      {entry.tags.length > 0 && (
-                        <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                          <Tag className="w-3 h-3 text-gray-400" />
-                          {entry.tags.map((tag) => (
-                            <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input placeholder="Search knowledge base..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+        </div>
+        <div className="flex gap-1 bg-muted p-1 rounded-xl">
+          {["all", "general", "services", "pricing", "booking"].map((c) => (
+            <button
+              key={c}
+              onClick={() => setCategory(c)}
+              className={cn(
+                "px-3 py-1.5 text-xs font-medium rounded-lg transition-all capitalize",
+                category === c ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {loading ? (
+        <TableSkeleton rows={4} />
+      ) : filtered.length === 0 ? (
+        <EmptyState
+          icon={BookOpen}
+          title="No entries found"
+          description={search ? "Try adjusting your search." : "Add FAQ entries to help your AI assistant answer questions."}
+          action={
+            <Button onClick={openCreate} variant="outline">
+              <Plus className="w-4 h-4 mr-2" /> Add First Entry
+            </Button>
+          }
+        />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {filtered.map((entry, i) => (
+            <motion.div
+              key={entry.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+            >
+              <Card className="card-hover border-border/50 h-full">
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <h3 className="font-semibold text-sm leading-relaxed flex-1">{entry.question}</h3>
                     <div className="flex items-center gap-1 flex-shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleActive(entry)}
-                        className={cn(
-                          entry.active ? "text-gray-500" : "text-green-600"
-                        )}
-                        title={entry.active ? "Deactivate" : "Activate"}
-                      >
-                        <span className="text-xs">{entry.active ? "Active" : "Draft"}</span>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(entry)}>
+                        <Edit2 className="w-3.5 h-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => openEdit(entry)} className="text-orange-600">
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(entry.id)} className="text-red-500">
-                        <Trash2 className="w-4 h-4" />
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(entry.id)}>
+                        <Trash2 className="w-3.5 h-3.5" />
                       </Button>
                     </div>
                   </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-3 line-clamp-3">{entry.answer}</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="outline" className={cn("text-xs", categoryColors[entry.category] || categoryColors.general)}>
+                      {entry.category}
+                    </Badge>
+                    {entry.tags.slice(0, 3).map((tag) => (
+                      <Badge key={tag} variant="secondary" className="text-xs">
+                        <Tag className="w-3 h-3 mr-1" />{tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-black">
-              {editingId ? "Edit Entry" : "Add Knowledge Base Entry"}
-            </DialogTitle>
-            <DialogDescription>
-              These entries are injected into the AI's context to answer visitor questions accurately.
-            </DialogDescription>
+            <DialogTitle>{editing ? "Edit Entry" : "New Entry"}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 mt-4">
             <div className="space-y-2">
               <Label>Question</Label>
-              <Input
-                value={form.question}
-                onChange={(e) => setForm({ ...form, question: e.target.value })}
-                placeholder="e.g. How much does coaching cost?"
-                className="border-orange-200"
-              />
+              <Input placeholder="What question does this answer?" value={form.question} onChange={(e) => setForm({ ...form, question: e.target.value })} required />
             </div>
             <div className="space-y-2">
               <Label>Answer</Label>
-              <Textarea
-                value={form.answer}
-                onChange={(e) => setForm({ ...form, answer: e.target.value })}
-                placeholder="Provide a detailed, accurate answer..."
-                className="min-h-[120px] border-orange-200"
-              />
+              <Textarea placeholder="The answer the AI should give..." value={form.answer} onChange={(e) => setForm({ ...form, answer: e.target.value })} rows={4} required />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Category</Label>
-                <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v ?? "general" })}>
-                  <SelectTrigger className="border-orange-200">
-                    <SelectValue placeholder="Category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="general">General</SelectItem>
-                    <SelectItem value="services">Services</SelectItem>
-                    <SelectItem value="pricing">Pricing</SelectItem>
-                    <SelectItem value="booking">Booking</SelectItem>
-                  </SelectContent>
-                </Select>
+                <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full h-10 px-3 rounded-xl border border-input bg-background text-sm">
+                  <option value="general">General</option>
+                  <option value="services">Services</option>
+                  <option value="pricing">Pricing</option>
+                  <option value="booking">Booking</option>
+                </select>
               </div>
               <div className="space-y-2">
                 <Label>Tags (comma separated)</Label>
-                <Input
-                  value={form.tags}
-                  onChange={(e) => setForm({ ...form, tags: e.target.value })}
-                  placeholder="pricing, cost, coaching"
-                  className="border-orange-200"
-                />
+                <Input placeholder="coaching, pricing, FAQ" value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
               </div>
             </div>
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setDialogOpen(false)}>
-              <X className="w-4 h-4 mr-2" />
-              Cancel
+            <Button type="submit" className="w-full bg-gradient-to-r from-primary to-purple-600 text-white">
+              {editing ? "Update Entry" : "Create Entry"}
             </Button>
-            <Button
-              onClick={handleSave}
-              disabled={saving || !form.question.trim() || !form.answer.trim()}
-              className="bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600"
-            >
-              {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-              {editingId ? "Save Changes" : "Add Entry"}
-            </Button>
-          </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

@@ -152,23 +152,24 @@ export default function ChatPanel({ onClose, fullPage = false }: ChatPanelProps)
   return (
     <div
       className={cn(
-        "flex flex-col overflow-hidden rounded-2xl shadow-2xl shadow-orange-200/50 border border-orange-100 bg-white",
+        "flex flex-col overflow-hidden rounded-2xl shadow-2xl border border-border bg-card",
         fullPage ? "h-[calc(100vh-220px)] min-h-[480px]" : "h-[500px] max-h-[70vh]"
       )}
     >
-      <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-400 p-4 flex items-center justify-between">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-primary via-primary/90 to-purple-600 p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <motion.div
             animate={{ scale: [1, 1.1, 1] }}
             transition={{ repeat: Infinity, duration: 2 }}
-            className="w-10 h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center"
+            className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center"
           >
             <Sparkles className="w-5 h-5 text-white" />
           </motion.div>
           <div>
             <p className="text-white font-semibold">CoachFlow AI</p>
             <p className="text-white/80 text-xs flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-green-300 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               Online · Replies instantly
             </p>
           </div>
@@ -176,7 +177,7 @@ export default function ChatPanel({ onClose, fullPage = false }: ChatPanelProps)
         {onClose && (
           <button
             onClick={onClose}
-            className="text-white/80 hover:text-white transition-colors"
+            className="text-white/70 hover:text-white transition-colors rounded-lg p-1 hover:bg-white/10"
             aria-label="Close chat"
           >
             <X className="w-5 h-5" />
@@ -184,44 +185,47 @@ export default function ChatPanel({ onClose, fullPage = false }: ChatPanelProps)
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-orange-50/50 to-white">
-        {messages.map((msg) => (
-          <motion.div
-            key={msg.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className={cn(
-              "flex gap-2.5",
-              msg.role === "user" ? "flex-row-reverse" : "flex-row"
-            )}
-          >
-            <div
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-muted/30 to-background">
+        <AnimatePresence>
+          {messages.map((msg) => (
+            <motion.div
+              key={msg.id}
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.3 }}
               className={cn(
-                "w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-1",
-                msg.role === "assistant"
-                  ? "bg-gradient-to-br from-orange-400 to-amber-400"
-                  : "bg-gray-200"
+                "flex gap-2.5",
+                msg.role === "user" ? "flex-row-reverse" : "flex-row"
               )}
             >
-              {msg.role === "assistant" ? (
-                <Bot className="w-4 h-4 text-white" />
-              ) : (
-                <User className="w-4 h-4 text-gray-600" />
-              )}
-            </div>
-            <div
-              className={cn(
-                "px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed max-w-[80%]",
-                msg.role === "assistant"
-                  ? "bg-white border border-orange-100 rounded-tl-sm shadow-sm"
-                  : "bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-tr-sm"
-              )}
-            >
-              {msg.content}
-            </div>
-          </motion.div>
-        ))}
+              <div
+                className={cn(
+                  "w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-1",
+                  msg.role === "assistant"
+                    ? "bg-gradient-to-br from-primary to-purple-600"
+                    : "bg-muted"
+                )}
+              >
+                {msg.role === "assistant" ? (
+                  <Bot className="w-4 h-4 text-white" />
+                ) : (
+                  <User className="w-4 h-4 text-muted-foreground" />
+                )}
+              </div>
+              <div
+                className={cn(
+                  "px-4 py-2.5 rounded-2xl text-sm leading-relaxed max-w-[80%]",
+                  msg.role === "assistant"
+                    ? "bg-card border border-border rounded-tl-sm shadow-sm"
+                    : "bg-gradient-to-r from-primary to-purple-600 text-white rounded-tr-sm"
+                )}
+              >
+                {msg.content}
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
 
         {isTyping && (
           <motion.div
@@ -229,17 +233,17 @@ export default function ChatPanel({ onClose, fullPage = false }: ChatPanelProps)
             animate={{ opacity: 1, y: 0 }}
             className="flex gap-2.5"
           >
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-400 to-amber-400 flex items-center justify-center flex-shrink-0 mt-1">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center flex-shrink-0 mt-1">
               <Bot className="w-4 h-4 text-white" />
             </div>
-            <div className="bg-white border border-orange-100 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
-              <div className="flex gap-1">
+            <div className="bg-card border border-border rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
+              <div className="flex gap-1.5">
                 {[0, 1, 2].map((i) => (
                   <motion.span
                     key={i}
                     animate={{ opacity: [0.3, 1, 0.3] }}
                     transition={{ repeat: Infinity, duration: 1, delay: i * 0.2 }}
-                    className="w-1.5 h-1.5 rounded-full bg-orange-400"
+                    className="w-2 h-2 rounded-full bg-primary/40"
                   />
                 ))}
               </div>
@@ -249,7 +253,8 @@ export default function ChatPanel({ onClose, fullPage = false }: ChatPanelProps)
         <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={handleSend} className="p-3 border-t border-orange-100 bg-white">
+      {/* Input */}
+      <form onSubmit={handleSend} className="p-3 border-t border-border bg-card">
         <div className="flex items-center gap-2">
           <input
             ref={inputRef}
@@ -257,13 +262,13 @@ export default function ChatPanel({ onClose, fullPage = false }: ChatPanelProps)
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type your message..."
-            className="flex-1 px-4 py-2.5 rounded-xl border border-orange-200 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 bg-orange-50/50 placeholder:text-gray-400"
+            className="flex-1 px-4 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-background placeholder:text-muted-foreground"
           />
           <motion.button
             whileTap={{ scale: 0.9 }}
             type="submit"
             disabled={!input.trim() || isTyping}
-            className="w-10 h-10 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white flex items-center justify-center disabled:opacity-50 hover:from-orange-600 hover:to-amber-600 transition-colors"
+            className="w-10 h-10 rounded-xl bg-gradient-to-r from-primary to-purple-600 text-white flex items-center justify-center disabled:opacity-50 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-shadow"
           >
             <Send className="w-4 h-4" />
           </motion.button>

@@ -3,9 +3,10 @@
 import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, MessageCircle, CalendarCheck, TrendingUp, Loader2, ArrowUpRight } from "lucide-react"
+import { Users, MessageCircle, CalendarCheck, TrendingUp, ArrowUpRight } from "lucide-react"
 import Link from "next/link"
 import type { Session } from "next-auth"
+import { StatCardSkeleton } from "@/components/ui/loading-skeleton"
 
 interface Stats {
   totalLeads: number
@@ -24,7 +25,7 @@ const container = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: { staggerChildren: 0.1 },
+    transition: { staggerChildren: 0.08 },
   },
 }
 
@@ -49,47 +50,45 @@ export function DashboardContent({ session }: { session: Session }) {
       title: "Total Conversations",
       value: stats?.totalConversations ?? 0,
       icon: MessageCircle,
-      color: "from-orange-400 to-amber-400",
+      gradient: "from-primary to-purple-600",
       sub: "All AI conversations",
     },
     {
       title: "Qualified Leads",
       value: stats?.totalLeads ?? 0,
       icon: Users,
-      color: "from-amber-400 to-yellow-400",
+      gradient: "from-amber-500 to-orange-500",
       sub: `${stats?.hotLeads ?? 0} hot · ${stats?.warmLeads ?? 0} warm · ${stats?.coldLeads ?? 0} cold`,
+      growth: stats?.monthGrowth,
     },
     {
       title: "Appointments Booked",
       value: stats?.totalAppointments ?? 0,
       icon: CalendarCheck,
-      color: "from-orange-500 to-orange-400",
+      gradient: "from-emerald-500 to-teal-500",
       sub: `${stats?.confirmedAppointments ?? 0} confirmed`,
     },
     {
       title: "Conversion Rate",
       value: stats ? `${stats.conversionRate}%` : "0%",
       icon: TrendingUp,
-      color: "from-yellow-400 to-amber-300",
+      gradient: "from-blue-500 to-indigo-500",
       sub: "Leads → booked calls",
     },
   ]
 
   return (
     <div className="space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <h1 className="text-2xl sm:text-3xl font-bold text-black">Dashboard</h1>
-        <p className="text-gray-500 mt-1">
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+        <h1 className="text-2xl sm:text-3xl font-bold">Dashboard</h1>
+        <p className="text-muted-foreground mt-1">
           Welcome back{session.user?.name ? `, ${session.user.name}` : ""}! Here&apos;s your lead flow overview.
         </p>
       </motion.div>
 
       {loading ? (
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-orange-400" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)}
         </div>
       ) : (
         <>
@@ -101,24 +100,22 @@ export function DashboardContent({ session }: { session: Session }) {
           >
             {statCards.map((stat) => (
               <motion.div key={stat.title} variants={item}>
-                <Card className="border-orange-100 hover:shadow-lg hover:shadow-orange-100/30 transition-all duration-300">
+                <Card className="card-hover border-border/50">
                   <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-500">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
                       {stat.title}
                     </CardTitle>
-                    <div
-                      className={`w-9 h-9 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}
-                    >
-                      <stat.icon className="w-4 h-4 text-white" />
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-lg`}>
+                      <stat.icon className="w-5 h-5 text-white" />
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-black">{stat.value}</div>
-                    <p className="text-xs text-gray-500 font-medium mt-1">
+                    <div className="text-3xl font-bold">{stat.value}</div>
+                    <p className="text-xs text-muted-foreground mt-1">
                       {stat.sub}
-                      {stat.title === "Qualified Leads" && stats && stats.monthGrowth !== 0 && (
-                        <span className="text-green-600 ml-2">
-                          {stats.monthGrowth > 0 ? "+" : ""}{stats.monthGrowth}% this month
+                      {"growth" in stat && stat.growth !== undefined && stat.growth !== 0 && (
+                        <span className="text-emerald-500 font-medium ml-2">
+                          {stat.growth > 0 ? "+" : ""}{stat.growth}%
                         </span>
                       )}
                     </p>
@@ -130,60 +127,40 @@ export function DashboardContent({ session }: { session: Session }) {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Link href="/dashboard/leads">
-              <Card className="border-orange-100 hover:shadow-lg hover:shadow-orange-100/30 transition-all duration-300 h-full">
+              <Card className="card-hover border-border/50 h-full">
                 <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-lg text-black">Qualified Leads</CardTitle>
-                  <ArrowUpRight className="w-5 h-5 text-orange-400" />
+                  <CardTitle className="text-lg">Qualified Leads</CardTitle>
+                  <ArrowUpRight className="w-5 h-5 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   {stats && stats.totalLeads === 0 ? (
-                    <div className="flex items-center justify-center h-40 text-gray-400">
+                    <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">
                       No leads yet. Configure your AI assistant to get started.
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      <div>
-                        <div className="flex items-center justify-between text-sm mb-2">
-                          <span className="text-orange-600 font-medium">Hot ({stats?.hotLeads ?? 0})</span>
-                          <span className="text-gray-400">Call ready</span>
+                      {[
+                        { label: "Hot", count: stats?.hotLeads ?? 0, color: "from-orange-500 to-red-500", bg: "bg-orange-500/10", text: "text-orange-500" },
+                        { label: "Warm", count: stats?.warmLeads ?? 0, color: "from-amber-400 to-yellow-400", bg: "bg-amber-500/10", text: "text-amber-500" },
+                        { label: "Cold", count: stats?.coldLeads ?? 0, color: "from-blue-400 to-cyan-400", bg: "bg-blue-500/10", text: "text-blue-500" },
+                      ].map((lead) => (
+                        <div key={lead.label}>
+                          <div className="flex items-center justify-between text-sm mb-2">
+                            <span className={`font-medium ${lead.text}`}>{lead.label} ({lead.count})</span>
+                            <span className="text-muted-foreground text-xs">
+                              {lead.label === "Hot" ? "Call ready" : lead.label === "Warm" ? "Needs nurturing" : "Not ready"}
+                            </span>
+                          </div>
+                          <div className={`h-2 rounded-full ${lead.bg} overflow-hidden`}>
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${(lead.count / Math.max(stats?.totalLeads ?? 1, 1)) * 100}%` }}
+                              transition={{ duration: 1, ease: "easeOut" }}
+                              className={`h-full bg-gradient-to-r ${lead.color} rounded-full`}
+                            />
+                          </div>
                         </div>
-                        <div className="h-2.5 rounded-full bg-orange-50 overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${((stats?.hotLeads ?? 0) / Math.max(stats?.totalLeads ?? 1, 1)) * 100}%` }}
-                            transition={{ duration: 0.8 }}
-                            className="h-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-full"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <div className="flex items-center justify-between text-sm mb-2">
-                          <span className="text-amber-600 font-medium">Warm ({stats?.warmLeads ?? 0})</span>
-                          <span className="text-gray-400">Needs nurturing</span>
-                        </div>
-                        <div className="h-2.5 rounded-full bg-amber-50 overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${((stats?.warmLeads ?? 0) / Math.max(stats?.totalLeads ?? 1, 1)) * 100}%` }}
-                            transition={{ duration: 0.8 }}
-                            className="h-full bg-gradient-to-r from-amber-400 to-yellow-400 rounded-full"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <div className="flex items-center justify-between text-sm mb-2">
-                          <span className="text-blue-600 font-medium">Cold ({stats?.coldLeads ?? 0})</span>
-                          <span className="text-gray-400">Not ready</span>
-                        </div>
-                        <div className="h-2.5 rounded-full bg-blue-50 overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${((stats?.coldLeads ?? 0) / Math.max(stats?.totalLeads ?? 1, 1)) * 100}%` }}
-                            transition={{ duration: 0.8 }}
-                            className="h-full bg-blue-400 rounded-full"
-                          />
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   )}
                 </CardContent>
@@ -191,13 +168,13 @@ export function DashboardContent({ session }: { session: Session }) {
             </Link>
 
             <Link href="/dashboard/appointments">
-              <Card className="border-orange-100 hover:shadow-lg hover:shadow-orange-100/30 transition-all duration-300 h-full">
+              <Card className="card-hover border-border/50 h-full">
                 <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-lg text-black">Upcoming Appointments</CardTitle>
-                  <ArrowUpRight className="w-5 h-5 text-orange-400" />
+                  <CardTitle className="text-lg">Upcoming Appointments</CardTitle>
+                  <ArrowUpRight className="w-5 h-5 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center justify-center h-40 text-gray-400">
+                  <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">
                     {stats && stats.totalAppointments > 0
                       ? `${stats.totalAppointments} appointment(s) scheduled`
                       : "No appointments scheduled yet."}

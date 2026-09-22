@@ -33,9 +33,10 @@ export default function ChatWidget() {
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "fixed bottom-6 right-4 sm:right-6 z-50 w-14 h-14 rounded-full shadow-xl flex items-center justify-center",
-          "bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-400",
-          "hover:shadow-orange-200 hover:shadow-2xl transition-shadow"
+          "fixed bottom-6 right-4 sm:right-6 z-50 w-14 h-14 rounded-2xl flex items-center justify-center",
+          "bg-gradient-to-br from-primary to-purple-600 text-white",
+          "shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40",
+          "transition-shadow duration-300"
         )}
         aria-label="Chat with us"
       >
@@ -46,7 +47,6 @@ export default function ChatWidget() {
               initial={{ rotate: -90, opacity: 0 }}
               animate={{ rotate: 0, opacity: 1 }}
               exit={{ rotate: 90, opacity: 0 }}
-              className="text-white"
             >
               <X className="w-6 h-6" />
             </motion.span>
@@ -56,7 +56,6 @@ export default function ChatWidget() {
               initial={{ rotate: 90, opacity: 0 }}
               animate={{ rotate: 0, opacity: 1 }}
               exit={{ rotate: -90, opacity: 0 }}
-              className="text-white"
             >
               <MessageCircle className="w-6 h-6" />
             </motion.span>

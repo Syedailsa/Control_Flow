@@ -9,8 +9,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Sparkles, Loader2 } from "lucide-react"
+import { Loader2, ArrowRight } from "lucide-react"
 import Link from "next/link"
+import AnimatedLogo from "@/components/ui/animated-logo"
 
 function LoginForm() {
   const router = useRouter()
@@ -44,9 +45,9 @@ function LoginForm() {
   }
 
   return (
-    <Card className="border-orange-100 shadow-xl shadow-orange-100/50">
-      <CardHeader>
-        <CardTitle className="text-2xl text-black">Welcome Back</CardTitle>
+    <Card className="border-border/50 shadow-xl shadow-primary/5">
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl">Welcome Back</CardTitle>
         <CardDescription>Sign in to your CoachFlow dashboard</CardDescription>
       </CardHeader>
       <CardContent>
@@ -60,7 +61,6 @@ function LoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="border-orange-200 focus-visible:ring-orange-400"
             />
           </div>
           <div className="space-y-2">
@@ -72,18 +72,25 @@ function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="border-orange-200 focus-visible:ring-orange-400"
             />
           </div>
 
-          {error && <p className="text-sm text-red-500 font-medium">{error}</p>}
+          {error && (
+            <motion.p
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-sm text-destructive font-medium"
+            >
+              {error}
+            </motion.p>
+          )}
 
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600"
+            className="w-full bg-gradient-to-r from-primary to-purple-600 text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30"
           >
-            {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+            {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ArrowRight className="w-4 h-4 mr-2" />}
             Sign In
           </Button>
         </form>
@@ -94,36 +101,58 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-warm p-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
-      >
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <Sparkles className="w-6 h-6 text-orange-500" />
-            <span className="text-2xl font-bold bg-gradient-to-r from-orange-700 to-amber-700 bg-clip-text text-transparent">CoachFlow AI</span>
-          </Link>
+    <div className="min-h-screen flex">
+      {/* Left: gradient panel */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+        <div className="absolute inset-0 gradient-brand" />
+        <div className="absolute inset-0 opacity-10" style={{
+          backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)",
+          backgroundSize: "32px 32px",
+        }} />
+        <div className="relative z-10 flex flex-col items-center justify-center p-12 text-white">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="text-center"
+          >
+            <h1 className="text-4xl font-bold mb-4">CoachFlow AI</h1>
+            <p className="text-white/80 text-lg max-w-md">
+              Automate lead qualification, book discovery calls, and scale your coaching business — all with AI.
+            </p>
+          </motion.div>
         </div>
+      </div>
 
-        <Suspense fallback={
-          <Card className="border-orange-100 shadow-xl shadow-orange-100/50">
-            <CardHeader>
-              <CardTitle className="text-2xl text-black">Welcome Back</CardTitle>
-              <CardDescription>Sign in to your CoachFlow dashboard</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
-              </div>
-            </CardContent>
-          </Card>
-        }>
-          <LoginForm />
-        </Suspense>
-      </motion.div>
+      {/* Right: login form */}
+      <div className="flex-1 flex items-center justify-center p-8 gradient-mesh">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md"
+        >
+          <div className="text-center mb-8 lg:hidden">
+            <AnimatedLogo size="lg" />
+          </div>
+
+          <div className="hidden lg:block text-center mb-8">
+            <Link href="/">
+              <AnimatedLogo size="lg" />
+            </Link>
+          </div>
+
+          <Suspense fallback={
+            <Card className="border-border/50">
+              <CardContent className="flex items-center justify-center py-12">
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              </CardContent>
+            </Card>
+          }>
+            <LoginForm />
+          </Suspense>
+        </motion.div>
+      </div>
     </div>
   )
 }
